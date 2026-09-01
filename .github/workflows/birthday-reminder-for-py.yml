@@ -1,0 +1,37 @@
+name: Birthday Slack Reminder form Python Script
+
+on:
+  workflow_dispatch:
+
+  schedule:
+    # 10:35 AM IST = 05:05 UTC
+    - cron: "5 5 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  birthday-reminder:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run birthday reminder
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          python send_birthday_slack_reminder.py

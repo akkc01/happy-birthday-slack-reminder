@@ -1,4 +1,4 @@
-name: Birthday Slack Reminder
+name: Birthday Slack Reminder from PowerShell Script
 
 on:
   workflow_dispatch:
@@ -26,6 +26,28 @@ jobs:
         shell: pwsh
         run: |
           Install-Module ImportExcel -Scope CurrentUser -Force -AllowClobber
+
+      - name: Debug script
+        shell: pwsh
+        run: |
+          Write-Host "===== CURRENT COMMIT ====="
+          git rev-parse HEAD
+
+          Write-Host "===== SCRIPT PATH ====="
+          Get-Item "./scripts/Send-BirthdaySlackReminder.ps1" | Format-List FullName,Length,LastWriteTime
+
+          Write-Host "===== CHECK TIMEZONE CODE ====="
+          Select-String `
+            -Path "./scripts/Send-BirthdaySlackReminder.ps1" `
+            -Pattern "India Standard Time"
+
+          Write-Host "===== CHECK OLD CODE ====="
+          Select-String `
+            -Path "./scripts/Send-BirthdaySlackReminder.ps1" `
+            -Pattern "Get-Date"
+
+          Write-Host "===== SCRIPT CONTENT ====="
+          Get-Content "./scripts/Send-BirthdaySlackReminder.ps1"
 
       - name: Run birthday scanner
         shell: pwsh
