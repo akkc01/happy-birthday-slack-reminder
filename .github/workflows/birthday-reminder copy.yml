@@ -1,4 +1,4 @@
-name: Birthday Slack Reminder
+name: Birthday Slack Reminder1
 
 on:
   workflow_dispatch:
