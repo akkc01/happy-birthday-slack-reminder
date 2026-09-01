@@ -1,0 +1,59 @@
+name: Birthday Slack Reminder
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 10:35 AM IST = 05:05 UTC
+    - cron: "5 5 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  birthday-reminder:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup PowerShell
+        shell: pwsh
+        run: |
+          $PSVersionTable.PSVersion
+
+      - name: Install ImportExcel module
+        shell: pwsh
+        run: |
+          Install-Module ImportExcel -Scope CurrentUser -Force -AllowClobber
+
+      - name: Debug script
+        shell: pwsh
+        run: |
+          Write-Host "===== CURRENT COMMIT ====="
+          git rev-parse HEAD
+
+          Write-Host "===== SCRIPT PATH ====="
+          Get-Item "./scripts/Send-BirthdaySlackReminder.ps1" | Format-List FullName,Length,LastWriteTime
+
+          Write-Host "===== CHECK TIMEZONE CODE ====="
+          Select-String `
+            -Path "./scripts/Send-BirthdaySlackReminder.ps1" `
+            -Pattern "India Standard Time"
+
+          Write-Host "===== CHECK OLD CODE ====="
+          Select-String `
+            -Path "./scripts/Send-BirthdaySlackReminder.ps1" `
+            -Pattern "Get-Date"
+
+          Write-Host "===== SCRIPT CONTENT ====="
+          Get-Content "./scripts/Send-BirthdaySlackReminder.ps1"
+
+      - name: Run birthday scanner
+        shell: pwsh
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          ./scripts/Send-BirthdaySlackReminder.ps1 `
+            -ExcelPath "data/birthdays.xlsx" `
+            -WorksheetName "Birthdays"
